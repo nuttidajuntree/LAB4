@@ -44,7 +44,7 @@ UART_HandleTypeDef huart2;
 /* USER CODE BEGIN PV */
 arm_pid_instance_f32 PID = {0};
 float position = 0;
-float setposition = 0;
+float setpoint = 0;
 float Vfeedback = 0;
 /* USER CODE END PV */
 
@@ -106,7 +106,7 @@ int main(void)
 	  {
 		  timestamp = HAL_GetTick()+10;
 
-		  Vfeedback = arm_pid_f32(&PID, setposition - position);
+		  Vfeedback = arm_pid_f32(&PID, setpoint - position);
 		  position = PlantSimulation(Vfeedback);
 	  }
     /* USER CODE END WHILE */
@@ -233,7 +233,7 @@ float PlantSimulation(float VIn)
 {
 	static float speed = 0;
 	static float position = 0;
-	float current = VIn - speed * 0.0123;
+	float current = VIn - speed * 0.6;
 	float torque = current * 0.456;
 	float acc = torque * 0.789;
 	speed += acc;

@@ -1371,7 +1371,7 @@ float PlantSimulation(float VIn)
  8000e4e:	ed87 0a01 	vstr	s0, [r7, #4]
 	static float speed = 0;
 	static float position = 0;
-	float current = VIn - speed * 0.0123;
+	float current = VIn - speed * 0.6;
  8000e52:	6878      	ldr	r0, [r7, #4]
  8000e54:	f7ff fc4e 	bl	80006f4 <__aeabi_f2d>
  8000e58:	4604      	mov	r4, r0
@@ -1445,8 +1445,8 @@ float PlantSimulation(float VIn)
  8000f02:	3718      	adds	r7, #24
  8000f04:	46bd      	mov	sp, r7
  8000f06:	bdb0      	pop	{r4, r5, r7, pc}
- 8000f08:	0ded288d 	.word	0x0ded288d
- 8000f0c:	3f8930be 	.word	0x3f8930be
+ 8000f08:	33333333 	.word	0x33333333
+ 8000f0c:	3fe33333 	.word	0x3fe33333
  8000f10:	9fbe76c9 	.word	0x9fbe76c9
  8000f14:	3fdd2f1a 	.word	0x3fdd2f1a
  8000f18:	ed916873 	.word	0xed916873
