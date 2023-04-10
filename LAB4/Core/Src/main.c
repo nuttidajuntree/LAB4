@@ -42,7 +42,10 @@
 UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
-
+arm_pid_instance_f32 PID = {0};
+float position = 0;
+float setposition = 0;
+float Vfeedback = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -50,7 +53,7 @@ void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_USART2_UART_Init(void);
 /* USER CODE BEGIN PFP */
-
+float PlantSimulation(float VIn);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -88,13 +91,24 @@ int main(void)
   MX_GPIO_Init();
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
-
+  PID.Kp = 0.1;
+  PID.Ki = 0.00001;
+  PID.Kd = 0.1;
+  arm_pid_init_f32(&PID, 0);
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+	  static uint32_t timestamp = 0;
+	  if(timestamp < HAL_GetTick())
+	  {
+		  timestamp = HAL_GetTick()+10;
+
+		  Vfeedback = arm_pid_f32(&PID, setposition - position);
+		  position = PlantSimulation(Vfeedback);
+	  }
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -215,7 +229,17 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
-
+float PlantSimulation(float VIn)
+{
+	static float speed = 0;
+	static float position = 0;
+	float current = VIn - speed * 0.0123;
+	float torque = current * 0.456;
+	float acc = torque * 0.789;
+	speed += acc;
+	position += speed;
+	return position;
+}
 /* USER CODE END 4 */
 
 /**
