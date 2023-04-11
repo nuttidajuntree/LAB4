@@ -151,17 +151,12 @@ int main(void)
 		  {
 			  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, Duty);
 			  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_2, 0);
-			  //Duty_1 = Duty;
-			  //Duty_2 = 0;
 		  }
 		  else if(Vfeedback > 0.04)
 		  {
 			  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, 0);
 			  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_2, Duty);
-			  //Duty_1 = 0;
-			  //Duty_2 = Duty;
 		  }
-		  //position = PlantSimulation(Vfeedback);
 	  }
     /* USER CODE END WHILE */
 
@@ -456,17 +451,7 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
-/*float PlantSimulation(float VIn)
-{
-	static float speed = 0;
-	static float position = 0;
-	float current = VIn - speed * 0.6;
-	float torque = current * 0.456;
-	float acc = torque * 0.789;
-	speed += acc;
-	position += speed;
-	return position;
-}*/
+
 /* USER CODE END 4 */
 
 /**
