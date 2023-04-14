@@ -55,15 +55,15 @@ float last_setpoint = 0;
 
 // QEI
 uint32_t QEIReadRaw;
+uint32_t last_QEIReadRaw = 0;
+uint32_t QEI_count = 0;
 float Degree = 0;
 float diff = 0;
+uint16_t count = 0;
 
 // OUTPUT COMPARE
-float Duty_1 = 0;
-float Duty_2 = 0;
 uint16_t Duty = 0;
 
-uint16_t x = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -116,9 +116,9 @@ int main(void)
   MX_TIM1_Init();
   /* USER CODE BEGIN 2 */
   // PID
-  PID.Kp = 0.58;
-  PID.Ki = 0.0015;
-  PID.Kd = 0.1;
+  PID.Kp = 0.55;
+  PID.Ki = 0.0006;
+  PID.Kd = 0.3;
   arm_pid_init_f32(&PID, 0);
 
   // QEI
@@ -139,8 +139,14 @@ int main(void)
 		  timestamp = HAL_GetTick()+10;
 
 		  QEIReadRaw = __HAL_TIM_GET_COUNTER(&htim3);
+		  count = last_QEIReadRaw - QEIReadRaw;
+		  if(count > 60000 && count < 62000)
+		  {
+			  QEI_count += QEIReadRaw + (61439 - last_QEIReadRaw);
+		  }
+		  else{QEI_count += QEIReadRaw - last_QEIReadRaw;}
 
-		  Degree = QEIReadRaw*360.0/3072.0;
+		  Degree = QEI_count*360.0/3072.0;
 
 		  Vfeedback = arm_pid_f32(&PID, setpoint - Degree);
 
@@ -161,6 +167,7 @@ int main(void)
 			  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, 0);
 			  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_2, Duty);
 		  }
+		  last_QEIReadRaw = QEIReadRaw;
 	  }
     /* USER CODE END WHILE */
 
