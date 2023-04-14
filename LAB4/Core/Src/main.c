@@ -51,10 +51,12 @@ arm_pid_instance_f32 PID = {0};
 float position = 0;
 float setpoint = 0;
 float Vfeedback = 0;
+float last_setpoint = 0;
 
 // QEI
 uint32_t QEIReadRaw;
 float Degree = 0;
+float diff = 0;
 
 // OUTPUT COMPARE
 float Duty_1 = 0;
@@ -114,8 +116,8 @@ int main(void)
   MX_TIM1_Init();
   /* USER CODE BEGIN 2 */
   // PID
-  PID.Kp = 0.59;
-  PID.Ki = 0.001;
+  PID.Kp = 0.58;
+  PID.Ki = 0.0015;
   PID.Kd = 0.1;
   arm_pid_init_f32(&PID, 0);
 
@@ -143,19 +145,19 @@ int main(void)
 		  Vfeedback = arm_pid_f32(&PID, setpoint - Degree);
 
 		  Duty = fabs(Vfeedback)*10;
+		  if(Duty > 1000){Duty = 1000;}
 
-		  if(setpoint - Degree < -0.1)
-		  {
+		  diff = setpoint - Degree;
+
+		  if(diff < 0 && diff > -0.2){
 			  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, 0);
 			  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_2, 0);
 		  }
-		  else if(Vfeedback < 0)
-		  {
+		  else if(Vfeedback < 0){
 			  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, Duty);
 			  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_2, 0);
 		  }
-		  else if(Vfeedback > 0)
-		  {
+		  else if(Vfeedback > 0){
 			  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, 0);
 			  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_2, Duty);
 		  }
