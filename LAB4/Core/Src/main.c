@@ -116,9 +116,9 @@ int main(void)
   MX_TIM1_Init();
   /* USER CODE BEGIN 2 */
   // PID
-  PID.Kp = 0.55;
-  PID.Ki = 0.0006;
-  PID.Kd = 0.3;
+  PID.Kp = 0.77;
+  PID.Ki = 0.000025;
+  PID.Kd = 0.2;
   arm_pid_init_f32(&PID, 0);
 
   // QEI
@@ -150,12 +150,12 @@ int main(void)
 
 		  Vfeedback = arm_pid_f32(&PID, setpoint - Degree);
 
-		  Duty = fabs(Vfeedback)*10;
+		  Duty = fabs(Vfeedback);
 		  if(Duty > 1000){Duty = 1000;}
 
 		  diff = setpoint - Degree;
 
-		  if(diff < 0 && diff > -0.2){
+		  if(diff < 0 && diff > -0.6){
 			  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, 0);
 			  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_2, 0);
 		  }
