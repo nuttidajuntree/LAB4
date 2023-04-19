@@ -41,17 +41,14 @@
 /* Private variables ---------------------------------------------------------*/
 TIM_HandleTypeDef htim1;
 TIM_HandleTypeDef htim3;
-TIM_HandleTypeDef htim5;
 
 UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
 // PID
 arm_pid_instance_f32 PID = {0};
-float position = 0;
 float setpoint = 0;
 float Vfeedback = 0;
-float last_setpoint = 0;
 
 // QEI
 uint32_t QEIReadRaw;
@@ -70,9 +67,8 @@ uint16_t Duty = 0;
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_USART2_UART_Init(void);
-static void MX_TIM3_Init(void);
-static void MX_TIM5_Init(void);
 static void MX_TIM1_Init(void);
+static void MX_TIM3_Init(void);
 /* USER CODE BEGIN PFP */
 //float PlantSimulation(float VIn);
 /* USER CODE END PFP */
@@ -111,14 +107,13 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_USART2_UART_Init();
-  MX_TIM3_Init();
-  MX_TIM5_Init();
   MX_TIM1_Init();
+  MX_TIM3_Init();
   /* USER CODE BEGIN 2 */
   // PID
-  PID.Kp = 0.77;
-  PID.Ki = 0.000025;
-  PID.Kd = 0.2;
+  PID.Kp = 20;
+  PID.Ki = 0;
+  PID.Kd = 0;
   arm_pid_init_f32(&PID, 0);
 
   // QEI
@@ -139,6 +134,7 @@ int main(void)
 		  timestamp = HAL_GetTick()+10;
 
 		  QEIReadRaw = __HAL_TIM_GET_COUNTER(&htim3);
+
 		  count = last_QEIReadRaw - QEIReadRaw;
 		  if(count > 60000 && count < 62000)
 		  {
@@ -152,19 +148,18 @@ int main(void)
 
 		  Duty = fabs(Vfeedback);
 		  if(Duty > 1000){Duty = 1000;}
+		  else if(Duty < 100){Duty = 100;}
 
 		  diff = setpoint - Degree;
 
-		  if(diff < 0 && diff > -0.6){
+		  if(diff < 0 && diff > -0.3){
 			  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, 0);
 			  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_2, 0);
 		  }
 		  else if(Vfeedback < 0){
 			  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, Duty);
-			  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_2, 0);
 		  }
 		  else if(Vfeedback > 0){
-			  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, 0);
 			  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_2, Duty);
 		  }
 		  last_QEIReadRaw = QEIReadRaw;
@@ -347,51 +342,6 @@ static void MX_TIM3_Init(void)
   /* USER CODE BEGIN TIM3_Init 2 */
 
   /* USER CODE END TIM3_Init 2 */
-
-}
-
-/**
-  * @brief TIM5 Initialization Function
-  * @param None
-  * @retval None
-  */
-static void MX_TIM5_Init(void)
-{
-
-  /* USER CODE BEGIN TIM5_Init 0 */
-
-  /* USER CODE END TIM5_Init 0 */
-
-  TIM_ClockConfigTypeDef sClockSourceConfig = {0};
-  TIM_MasterConfigTypeDef sMasterConfig = {0};
-
-  /* USER CODE BEGIN TIM5_Init 1 */
-
-  /* USER CODE END TIM5_Init 1 */
-  htim5.Instance = TIM5;
-  htim5.Init.Prescaler = 83;
-  htim5.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim5.Init.Period = 4294967295;
-  htim5.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
-  htim5.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
-  if (HAL_TIM_Base_Init(&htim5) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
-  if (HAL_TIM_ConfigClockSource(&htim5, &sClockSourceConfig) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
-  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
-  if (HAL_TIMEx_MasterConfigSynchronization(&htim5, &sMasterConfig) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /* USER CODE BEGIN TIM5_Init 2 */
-
-  /* USER CODE END TIM5_Init 2 */
 
 }
 
